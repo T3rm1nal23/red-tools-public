@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+
+currentdir=$(pwd)
+cd ~/Downloads
+
+# Enable extended globbing
+setopt nullglob
+
+# Collect matching files
+burp_installers=(burpsuite_pro_linux_v*.sh)
+
+# Check for at least one match
+if [[ ${#burp_installers[@]} -eq 0 ]]; then
+  echo "❌ No Burp Suite installer found in ~/Downloads."
+  cd "$currentdir"
+  exit 1
+fi
+
+# Sort by version substring and pick the newest
+# Extract version, sort in reverse, pick newest
+latest_installer=$(printf "%s\n" "${burp_installers[@]}" | sort -t'v' -k2 -r | head -n1)
+
+echo "✅ Found installer: $latest_installer"
+chmod +x "$latest_installer"
+sudo ./"$latest_installer"
+
+# Move all to backup
+mkdir -p ~/Documents/burpinstallbackup
+mv "${burp_installers[@]}" ~/Documents/burpinstallbackup/
+
+cd "$currentdir"
